@@ -19,3 +19,6 @@ jobs:
 
             - name: Run unit tests
               run: docker run --rm fizzbuzz vendor/bin/phpunit --testsuite=unit
+
+            - name: Run functional tests
+              run: docker run --rm fizzbuzz vendor/bin/phpunit --testsuite=functional

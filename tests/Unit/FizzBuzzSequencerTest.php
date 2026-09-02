@@ -29,9 +29,9 @@ final class FizzBuzzSequencerTest extends TestCase
     public static function provideCustomConfigurations(): iterable
     {
         yield 'Foo everywhere, Bar somewhere' => [
-            'limit' => 5,
             'int1' => 1,
             'int2' => 3,
+            'limit' => 5,
             'str1' => 'foo',
             'str2' => 'bar',
             'expected' => [
@@ -43,9 +43,9 @@ final class FizzBuzzSequencerTest extends TestCase
             ],
         ];
         yield 'No fizz, no buzz' => [
-            'limit' => 6,
             'int1' => 7,
             'int2' => 8,
+            'limit' => 6,
             'str1' => 'fizz',
             'str2' => 'buzz',
             'expected' => [
@@ -58,9 +58,9 @@ final class FizzBuzzSequencerTest extends TestCase
             ],
         ];
         yield 'Confusing' => [
-            'limit' => 6,
             'int1' => 2,
             'int2' => 3,
+            'limit' => 6,
             'str1' => '3',
             'str2' => '2',
             'expected' => [
@@ -108,9 +108,9 @@ final class FizzBuzzSequencerTest extends TestCase
         string $str2 = self::DEFAULT_STR2,
     ): FizzBuzzRequest {
         return new FizzBuzzRequest(
-            limit: $limit,
             int1: $int1,
             int2: $int2,
+            limit: $limit,
             str1: $str1,
             str2: $str2,
         );
@@ -133,7 +133,7 @@ final class FizzBuzzSequencerTest extends TestCase
         string $str2,
         array $expected,
     ): void {
-        $request = $this->buildFizzBuzzRequest(limit: $limit, int1: $int1, int2: $int2, str1: $str1, str2: $str2);
+        $request = $this->buildFizzBuzzRequest(int1: $int1, int2: $int2, limit: $limit, str1: $str1, str2: $str2);
         $result = $this->fizzBuzzSequencer->generate($request);
         $this->assertSame($expected, $result);
     }
