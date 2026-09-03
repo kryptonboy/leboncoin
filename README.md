@@ -2,7 +2,29 @@
 A REST API implementation for fizz-buzz built with Symfony 8.1 (minimal skeleton) and PHP 8.5
 
 ## Requirements
+
+### Using docker (recommended)
 - [Docker](https://docs.docker.com/get-docker/)
+
+### Without docker
+- PHP 8.5 or later
+- A local Redis server
+  - **Linux / macOS**: install via your package manager (`apt install redis-server`, `brew install redis`, ...)
+  - **Windows**: [WSL2](https://learn.microsoft.com/windows/wsl/install) + `sudo apt install redis-server`
+- Verify `Redis` is running: `redis-cli ping` should return `PONG` (if `redis-cli` doesn't exist, you might have to install `redis-tools` through your package manager)
+- The PHP `redis` extension (`ext-redis`) installed and enabled:
+  - **Linux / macOS**: `pecl install redis`
+  - **Windows**: 
+    - [Download](https://downloads.php.net/~windows/pecl/releases/redis/6.3.0/) the archive matching (retrievable in PHPinfo):
+      - Your PHP version
+      - The architecture (x64 or x86)
+      - The Thread Safe configuration (Thread Safety enabled => TS, else => NTS)
+      - For instance, with PHP version 8.5 , x64 architecture and Thread Safety enabled, you should download php_redis-6.3.0-**8.5**-**ts**-vs17-**x64**.zip
+    - Extract and copy `php_redis.dll` into your PHP `ext/` folder
+    - Add to your `php.ini` and restart PHP:
+```ini
+extension=redis
+```
 
 ## Getting started
 
@@ -75,3 +97,12 @@ I considered it would be better not to allow the two numbers to be the same caus
 ### `str1` and `str2` must not be blank
 As the previous decision, this one seemed logic to me, not to have empty slots in the generated sequence
 
+### `str1` and `str2` are compared case-sensitively for statistics grouping
+Two requests with `str1=fizz` and `str1=Fizz` as only difference are tracked as distinct entries since they are generating different sequences
+
+### Tie in statistics
+In case two search parameters have the same hit number, I decided to break the tie by displaying the first one that reached that hit score. The other possibility was to show all the tied parameters, but only one result was expected according to the settlement.
+This is tracked by storing a last-hit timestamp per combination, only compared among tied entries when a tie actually occurs.
+
+### Statistics storage
+Statistics are currently stored in Redis. Other backends could be added (a SQL database, for instance) by implementing [`StatisticsTrackerInterface`](src/Service/StatisticsTracker/StatisticsTrackerInterface.php) and updating the service binding in [`services.yaml`](config/services.yaml).

@@ -37,6 +37,10 @@ final class FizzBuzzController extends AbstractController
             );
         }
 
+        // Stores the FizzBuzzRequest to retrieve it for statistics storage without having to parse the parameters again
+        // see https://symfony.com/doc/current/components/http_foundation.html#component-foundation-attributes
+        $request->attributes->set('fizzbuzz_request', $fizzBuzzRequest);
+
         return $this->json([
             'result' => $this->fizzBuzzSequencer->generate($fizzBuzzRequest),
         ]);
