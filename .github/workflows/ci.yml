@@ -38,4 +38,4 @@ jobs:
               run: docker run --rm fizzbuzz sh -c "php bin/console cache:warmup --env=dev && vendor/bin/phpstan analyse --no-progress"
 
             - name: Run php-cs-fixer
-              run: docker run --rm fizzbuzz vendor/bin/php-cs-fixer --dry-run --diff --no-interaction
+              run: docker run --rm fizzbuzz vendor/bin/php-cs-fixer fix --dry-run --diff --no-interaction
