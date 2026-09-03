@@ -33,3 +33,9 @@ jobs:
 
             - name: Run functional tests
               run: docker run --rm --network host -e REDIS_HOST=localhost -e REDIS_PORT=6379 fizzbuzz vendor/bin/phpunit --testsuite=functional
+
+            - name: Run PHPStan
+              run: docker run --rm fizzbuzz vendor/bin/phpstan analyse --no-progress
+
+            - name: Run php-cs-fixer
+              run: docker run --rm fizzbuzz vendor/bin/php-cs-fixer --dry-run --diff --no-interaction

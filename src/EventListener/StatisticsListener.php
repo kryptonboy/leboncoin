@@ -15,7 +15,8 @@ final readonly class StatisticsListener
 {
     public function __construct(
         private StatisticsTrackerInterface $statisticsTracker,
-    ) {}
+    ) {
+    }
 
     public function __invoke(TerminateEvent $event): void
     {

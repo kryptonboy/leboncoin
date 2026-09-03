@@ -18,6 +18,9 @@ final class FizzBuzzSequencerTest extends TestCase
 
     private FizzBuzzSequencer $fizzBuzzSequencer;
 
+    /**
+     * @return iterable<string, array<string, int>>
+     */
     public static function provideLimitValues(): iterable
     {
         yield 'Limit to 5' => ['limitValue' => 5];
@@ -26,6 +29,9 @@ final class FizzBuzzSequencerTest extends TestCase
         yield 'Limit to 100' => ['limitValue' => 100];
     }
 
+    /**
+     * @return iterable<string, array<string, mixed>>
+     */
     public static function provideCustomConfigurations(): iterable
     {
         yield 'Foo everywhere, Bar somewhere' => [
@@ -124,6 +130,9 @@ final class FizzBuzzSequencerTest extends TestCase
         $this->assertCount($limitValue, $result);
     }
 
+    /**
+     * @param array<string, string> $expected
+     */
     #[DataProvider('provideCustomConfigurations')]
     public function testWithCustomConfigurations(
         int $limit,

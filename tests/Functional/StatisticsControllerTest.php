@@ -31,7 +31,7 @@ final class StatisticsControllerTest extends WebTestCase
 
         self::assertResponseIsSuccessful();
 
-        $data = json_decode($this->client->getResponse()->getContent(), true);
+        $data = json_decode((string) $this->client->getResponse()->getContent(), true);
         self::assertNull($data['parameters']);
         self::assertSame(0, $data['hits']);
     }
@@ -49,7 +49,7 @@ final class StatisticsControllerTest extends WebTestCase
 
         self::assertResponseIsSuccessful();
 
-        $data = json_decode($this->client->getResponse()->getContent(), true);
+        $data = json_decode((string) $this->client->getResponse()->getContent(), true);
         self::assertSame(3, $data['parameters']['int1']);
         self::assertSame(5, $data['parameters']['int2']);
         self::assertSame(2, $data['hits']);
@@ -65,7 +65,7 @@ final class StatisticsControllerTest extends WebTestCase
 
         $this->client->request('GET', '/statistics');
 
-        $data = json_decode($this->client->getResponse()->getContent(), true);
+        $data = json_decode((string) $this->client->getResponse()->getContent(), true);
 
         // A reached its (tied) score of 1 before B did, so A should win the tie
         self::assertSame(3, $data['parameters']['int1']);

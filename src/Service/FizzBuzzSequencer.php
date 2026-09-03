@@ -15,12 +15,12 @@ class FizzBuzzSequencer
     {
         $fizzBuzzSequence = [];
 
-        for ($i = 1;$i <= $request->limit;$i++) {
-            $isMultipleOfInt1 = $i % $request->int1 === 0;
-            $isMultipleOfInt2 = $i % $request->int2 === 0;
+        for ($i = 1; $i <= $request->limit; ++$i) {
+            $isMultipleOfInt1 = 0 === $i % $request->int1;
+            $isMultipleOfInt2 = 0 === $i % $request->int2;
 
-            $fizzBuzzSequence[] = match(true) {
-                $isMultipleOfInt1 && $isMultipleOfInt2 => $request->str1 . $request->str2,
+            $fizzBuzzSequence[] = match (true) {
+                $isMultipleOfInt1 && $isMultipleOfInt2 => $request->str1.$request->str2,
                 $isMultipleOfInt1 => $request->str1,
                 $isMultipleOfInt2 => $request->str2,
                 default => (string) $i,

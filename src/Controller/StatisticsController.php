@@ -13,14 +13,15 @@ class StatisticsController extends AbstractController
 {
     public function __construct(
         private readonly StatisticsTrackerInterface $statisticsTracker,
-    ) {}
+    ) {
+    }
 
     #[Route('/statistics', methods: ['GET'])]
     public function __invoke(): JsonResponse
     {
         $statistic = $this->statisticsTracker->getMostFrequent();
 
-        if ($statistic === null) {
+        if (null === $statistic) {
             return $this->json([
                 'parameters' => null,
                 'hits' => 0,

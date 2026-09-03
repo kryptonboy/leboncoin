@@ -9,5 +9,6 @@ final class FizzBuzzStatistic
     public function __construct(
         public FizzBuzzRequest $fizzBuzzRequest,
         public int $hits,
-    ) {}
+    ) {
+    }
 }

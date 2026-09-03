@@ -15,7 +15,8 @@ final class RedisStatisticsTracker implements StatisticsTrackerInterface
 
     public function __construct(
         private readonly \Redis $redis,
-    ) {}
+    ) {
+    }
 
     public function recordHit(FizzBuzzRequest $fizzBuzzRequest): void
     {
@@ -45,8 +46,8 @@ final class RedisStatisticsTracker implements StatisticsTrackerInterface
         // Retrieve potentially tied scores
         $tiedKeys = $this->redis->zRangeByScore(
             self::SCORES_KEY,
-            (string)$maxScore,
-            (string)$maxScore
+            (string) $maxScore,
+            (string) $maxScore
         );
         if (count($tiedKeys) > 1) {
             $timestamps = $this->redis->hMget(self::LAST_HIT_KEY, $tiedKeys);
@@ -55,14 +56,14 @@ final class RedisStatisticsTracker implements StatisticsTrackerInterface
         }
 
         $params = json_decode(
-            $this->redis->hGet(self::PARAMS_KEY, $topKey),
+            $this->redis->hGet(self::PARAMS_KEY, (string) $topKey),
             true,
-            JSON_THROW_ON_ERROR
+            flags: JSON_THROW_ON_ERROR
         );
 
         return new FizzBuzzStatistic(
             fizzBuzzRequest: FizzBuzzRequest::fromParams($params),
-            hits: (int)$maxScore,
+            hits: (int) $maxScore,
         );
     }
 }
