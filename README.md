@@ -77,8 +77,36 @@ curl "http://localhost:8000/fizzbuzz?int1=3&int2=5&limit=15&str1=fizz&str2=buzz"
 }
 ```
 
-#### Postman collection
-A ready to use [Postman collection](postman_collection.json) is available at the root of the repository, covering both success and validation error cases.
+### `GET /statistics`
+
+Returns the parameters and hit count of the most frequently requested `/fizzbuzz` combination. Accepts no parameters.
+
+#### Example response - no data recorded yet
+
+```json
+{
+    "parameters": null,
+    "hits": 0
+}
+```
+
+### Example response - with data
+
+```json
+{
+    "parameters": {
+        "int1": 3,
+        "int2": 5,
+        "limit": 15,
+        "str1": "fizz",
+        "str2": "buzz"
+    },
+    "hits": 23
+}
+```
+
+### Postman collection
+A ready to use [Postman collection](postman_collection.json) is available at the root of the repository, covering both success and validation error cases. It also provides `/statistics` scenarios 
 
 To use it:
 1. Import `postman_collection.json` into Postman
@@ -106,3 +134,6 @@ This is tracked by storing a last-hit timestamp per combination, only compared a
 
 ### Statistics storage
 Statistics are currently stored in Redis. Other backends could be added (a SQL database, for instance) by implementing [`StatisticsTrackerInterface`](src/Service/StatisticsTracker/StatisticsTrackerInterface.php) and updating the service binding in [`services.yaml`](config/services.yaml).
+
+### Redis service in CI
+The functional test suite needs a real Redis instance to run against. GitHub Actions [service containers](https://docs.github.com/en/actions/tutorials/use-containerized-services/create-redis-service-containers) provide this: Redis is started alongside the job and reachable via `localhost` on the runner, torn down automatically once the job completes.
