@@ -10,6 +10,10 @@ RUN apk add --no-cache \
 
 RUN docker-php-ext-install intl mbstring
 
+RUN apk add --no-cache $PHPIZE_DEPS \
+    && pecl install redis \
+    && docker-php-ext-enable redis
+
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /app

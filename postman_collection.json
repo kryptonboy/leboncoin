@@ -268,6 +268,176 @@
                     ]
                 }
             ]
+        },
+        {
+            "name": "Statistics",
+            "item": [
+                {
+                    "name": "1. GET /fizzbuzz - hit A (int1=3, int2=5)",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{base_url}}/fizzbuzz?int1=3&int2=5&limit=15&str1=fizz&str2=buzz",
+                            "host": ["{{base_url}}"],
+                            "path": ["fizzbuzz"],
+                            "query": [
+                                { "key": "int1", "value": "3" },
+                                { "key": "int2", "value": "5" },
+                                { "key": "limit", "value": "15" },
+                                { "key": "str1", "value": "fizz" },
+                                { "key": "str2", "value": "buzz" }
+                            ]
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "2. GET /fizzbuzz - hit A again (should become the most frequent)",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{base_url}}/fizzbuzz?int1=3&int2=5&limit=15&str1=fizz&str2=buzz",
+                            "host": ["{{base_url}}"],
+                            "path": ["fizzbuzz"],
+                            "query": [
+                                { "key": "int1", "value": "3" },
+                                { "key": "int2", "value": "5" },
+                                { "key": "limit", "value": "15" },
+                                { "key": "str1", "value": "fizz" },
+                                { "key": "str2", "value": "buzz" }
+                            ]
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "3. GET /fizzbuzz - hit B (int1=2, int2=7, only once)",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{base_url}}/fizzbuzz?int1=2&int2=7&limit=15&str1=foo&str2=bar",
+                            "host": ["{{base_url}}"],
+                            "path": ["fizzbuzz"],
+                            "query": [
+                                { "key": "int1", "value": "2" },
+                                { "key": "int2", "value": "7" },
+                                { "key": "limit", "value": "15" },
+                                { "key": "str1", "value": "foo" },
+                                { "key": "str2", "value": "bar" }
+                            ]
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "4. GET /statistics - most frequent should be hit A (2 hits)",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{base_url}}/statistics",
+                            "host": ["{{base_url}}"],
+                            "path": ["statistics"]
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test('Response has \"parameters\" and \"hits\"', function () {",
+                                    "    const json = pm.response.json();",
+                                    "    pm.expect(json).to.have.property('parameters');",
+                                    "    pm.expect(json).to.have.property('hits');",
+                                    "});",
+                                    "",
+                                    "pm.test('Most frequent is hit A (int1=3, int2=5) with 2 hits', function () {",
+                                    "    const json = pm.response.json();",
+                                    "    pm.expect(json.parameters.int1).to.eql(3);",
+                                    "    pm.expect(json.parameters.int2).to.eql(5);",
+                                    "    pm.expect(json.hits).to.eql(2);",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Statistics - no data",
+            "item": [
+                {
+                    "name": "GET /statistics - before any /fizzbuzz call",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{base_url}}/statistics",
+                            "host": ["{{base_url}}"],
+                            "path": ["statistics"]
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test('parameters is null and hits is 0 when no data yet', function () {",
+                                    "    const json = pm.response.json();",
+                                    "    pm.expect(json.parameters).to.eql(null);",
+                                    "    pm.expect(json.hits).to.eql(0);",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
         }
     ]
 }

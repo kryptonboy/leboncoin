@@ -34,4 +34,20 @@ final readonly class FizzBuzzRequest
             str2: (string) ($params['str2'] ?? ''),
         );
     }
+
+    public function toArray(): array
+    {
+        return [
+            'int1' => $this->int1,
+            'int2' => $this->int2,
+            'limit' => $this->limit,
+            'str1' => $this->str1,
+            'str2' => $this->str2,
+        ];
+    }
+
+    public function getKey(): string
+    {
+        return hash('sha256', json_encode($this->toArray(), JSON_THROW_ON_ERROR));
+    }
 }
