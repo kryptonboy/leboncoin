@@ -49,6 +49,44 @@ docker build --target dev -t fizzbuzz:dev .
 docker build --target runtime -t fizzbuzz:prod .
 ```
 
+## Testing the production image locally
+
+The `runtime` target is what actually gets deployed, so it's worth verifying it works end-to-end before shipping. An `app-prod` service (built from the `runtime` target) is included in `docker-compose.yml` for this purpose.
+
+### 1. Point nginx to it
+
+In [`docker/nginx/default.conf`](`docker/nginx/default.conf`), comment out the `dev` target and uncomment the `app-prod` one:
+
+```nginx
+location ~ ^/index\.php(/|$) {
+    # fastcgi_pass app:9000;
+    fastcgi_pass app-prod:9000;
+    ...
+}
+```
+
+### 2. Rebuild and test
+
+```bash
+docker compose up -d --build
+curl "http://localhost:8000/fizzbuzz?int1=3&int2=5&limit=15&str1=fizz&str2=buzz"
+curl "http://localhost:8000/statistics"
+```
+
+### 3. Check the image size
+**Linux/macOS:**
+```bash
+docker images | grep fizzbuzz
+```
+**Windows:**
+```bash
+docker images | Select-String "fizzbuzz"
+```
+
+### 4. Switch back to `dev`
+
+Revert the nginx edit above to point back to `app:9000` for regular development.
+
 ### Running tests
 ```bash
 docker run --rm fizzbuzz:dev vendor/bin/phpunit
