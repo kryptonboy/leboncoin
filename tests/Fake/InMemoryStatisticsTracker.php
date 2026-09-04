@@ -9,7 +9,7 @@ use App\Dto\FizzBuzzStatistic;
 use App\Service\StatisticsTracker\StatisticsTrackerInterface;
 
 /**
- * Test only class to avoid querying Redis while unit testing App\EventListener\StatisticsListener and App\Controller\StatisticsController
+ * Test only class to avoid querying Redis while unit testing App\EventListener\StatisticsListener and App\Controller\StatisticsController.
  */
 final class InMemoryStatisticsTracker implements StatisticsTrackerInterface
 {

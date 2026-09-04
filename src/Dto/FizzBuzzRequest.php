@@ -13,7 +13,7 @@ final readonly class FizzBuzzRequest
         public int $int1,
         #[Assert\Sequentially([
             new Assert\Positive(),
-            new Assert\NotIdenticalTo(propertyPath: "int1", message: "This value should not be identical to int1."),
+            new Assert\NotIdenticalTo(propertyPath: 'int1', message: 'This value should not be identical to int1.'),
         ])]
         public int $int2,
         #[Assert\Positive]
@@ -22,8 +22,12 @@ final readonly class FizzBuzzRequest
         public string $str1,
         #[Assert\NotBlank]
         public string $str2,
-    ) {}
+    ) {
+    }
 
+    /**
+     * @param array<string, mixed> $params
+     */
     public static function fromParams(array $params): self
     {
         return new self(
@@ -35,6 +39,9 @@ final readonly class FizzBuzzRequest
         );
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function toArray(): array
     {
         return [
