@@ -1,0 +1,233 @@
+#see https://swagger.io/docs/specification/v3_0/basic-structure/
+openapi: 3.0.4
+info:
+    title: FizzBuzz API
+    description: A REST API implementation of FizzBuzz with request statistics tracking
+    version: 1.0.0
+
+servers:
+    - url: http://localhost:8000
+      description: Local development (via docker compose)
+
+paths:
+    /fizzbuzz:
+        get:
+            summary: Generate a FizzBuzz sequence
+            description: >
+                Returns a list of strings from 1 to `limit`, where multiples of `int1` are replaced by `str1`,
+                multiples of `int2` are replaced by `str2` and multiples of both are raplaced by `str1` + `str2`
+            operationId: getFizzBuzz
+            parameters:
+                - $ref: '#/components/parameters/Int1'
+                - $ref: '#/components/parameters/Int2'
+                - $ref: '#/components/parameters/Limit'
+                - $ref: '#/components/parameters/Str1'
+                - $ref: '#/components/parameters/Str2'
+            responses:
+                '200':
+                    $ref: '#/components/responses/FizzBuzzSuccess'
+                '400':
+                    $ref: '#/components/responses/ValidationError'
+                '429':
+                    $ref: '#/components/responses/TooManyRequests'
+        post:
+            summary: Generate a FizzBuzz sequence (JSON body)
+            description: >
+                Same behavior as `GET /fizzbuzz`, but parameters are provided via a JSON body instead of a
+                query string.
+            operationId: postFizzBuzz
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/FizzBuzzRequest'
+            responses:
+                '200':
+                    $ref: '#/components/responses/FizzBuzzSuccess'
+                '400':
+                    $ref: '#/components/responses/ValidationError'
+                '429':
+                    $ref: '#/components/responses/TooManyRequests'
+
+    /statistics:
+        get:
+            summary: Get the most frequently requested FizzBuzz combination
+            description: >
+                Returns the parameters and hit count of the most frequently requested `/fizzbuzz` combination.
+                In case of a tie, the combination that reached that hit count first is returned.
+            operationId: getStatistics
+            responses:
+                '200':
+                    description: Success
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/StatisticsResponse'
+                            examples:
+                                withData:
+                                    summary: A combination has been requested before
+                                    value:
+                                        parameters:
+                                            int1: 3
+                                            int2: 5
+                                            limit: 15
+                                            str1: fizz
+                                            str2: buzz
+                                        hits: 23
+                                noData:
+                                    summary: No /fizzbuzz request recorded yet
+                                    value:
+                                        parameters: null
+                                        hits: 0
+
+    /health:
+        get:
+            summary: Health check
+            description: Reports the status of the API and its dependencies.
+            operationId: getHealth
+            responses:
+                '200':
+                    description: The API and its dependencies are healthy
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/HealthResponse'
+                            example:
+                                status: ok
+                                redis: ok
+                '503':
+                    description: The API is degraded (a dependency is unreachable)
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/HealthResponse'
+                            example:
+                                status: degraded
+                                redis: unreachable
+
+components:
+    parameters:
+        Int1:
+            name: int1
+            in: query
+            required: true
+            description: Multiples of this number are replaced by `str1`
+            schema:
+                type: integer
+                example: 3
+        Int2:
+            name: int2
+            in: query
+            required: true
+            description: Multiples of this number are replaced by `str2. Must be different from `int1`
+            schema:
+                type: integer
+                example: 5
+        Limit:
+            name: limit
+            in: query
+            required: true
+            description: The sequence runs from 1 to this number (included)
+            schema:
+                type: integer
+                example: 15
+        Str1:
+            name: str1
+            in: query
+            required: true
+            description: Replacement string for multiples of `int1`
+            schema:
+                type: string
+                example: fizz
+        Str2:
+            name: str2
+            in: query
+            required: true
+            description: Replacement string for multiples of `int2`
+            schema:
+                type: string
+                example: buzz
+
+    schemas:
+        FizzBuzzRequest:
+            type: object
+            required: [int1, int2, limit, str1, str2]
+            properties:
+                int1:
+                    type: integer
+                    description: Must be strictly positive
+                    example: 3
+                int2:
+                    type: integer
+                    description: Must be strictly positive and different from `int1`
+                    example: 5
+                limit:
+                    type: integer
+                    description: Must be strictly positive
+                    example: 15
+                str1:
+                    type: string
+                    description: Must not be blank
+                    example: fizz
+                str2:
+                    type: string
+                    description: Must not be blank
+                    example: buzz
+
+        FizzBuzzResult:
+            type: object
+            properties:
+                result:
+                    type: array
+                    items:
+                        type: string
+                    example: ['1', '2', 'fizz', '4', 'buzz', 'fizz', '7', '8', 'fizz', 'buzz', '11', 'fizz', '13', '14', 'fizzbuzz']
+
+        ValidationErrorResponse:
+            type: object
+            properties:
+                errors:
+                    type: object
+                    additionalProperties:
+                        type: string
+                    example:
+                        int1: This value should be positive
+                        str1: This value should not be blank
+
+        StatisticsResponse:
+            type: object
+            properties:
+                parameters:
+                    nullable: true
+                    allOf:
+                        - $ref: '#/components/schemas/FizzBuzzRequest'
+                hits:
+                    type: integer
+                    example: 23
+
+        HealthResponse:
+            type: object
+            properties:
+                status:
+                    type: string
+                    enum: [ok, degraded]
+                redis:
+                    type: string
+                    enum: [ok, unreachable]
+
+    responses:
+        FizzBuzzSuccess:
+            description: Success
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/FizzBuzzResult'
+        ValidationError:
+            description: One or more parameters failed validation
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/ValidationErrorResponse'
+        TooManyRequests:
+            description: Rate limit exceeded for this client IP

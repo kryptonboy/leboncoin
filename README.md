@@ -242,3 +242,6 @@ Only `GET`, `OPTIONS`, and `POST` are allowed (the only methods the API actually
 
 ### `/health` endpoint
 Monitoring is part of production, the goal of this endpoint is to monitor the global status of the architecture. Could easily be completed as the project grows and requires new services to run.
+
+### OpenAPI specification
+A machine-readable [OpenAPI 3.0 specification](openapi.yaml) describing all endpoints is available at the root of the repository. You can view it interactively by pasting its content into the [Swagger Editor](https://editor.swagger.io/).
