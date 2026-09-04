@@ -66,4 +66,9 @@ final class RedisStatisticsTracker implements StatisticsTrackerInterface
             hits: (int) $maxScore,
         );
     }
+
+    public function reset(): void
+    {
+        $this->redis->del(self::SCORES_KEY, self::PARAMS_KEY, self::LAST_HIT_KEY);
+    }
 }

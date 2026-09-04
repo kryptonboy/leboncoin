@@ -80,6 +80,20 @@ paths:
                                     value:
                                         parameters: null
                                         hits: 0
+        delete:
+            tags: [Statistics]
+            summary: Reset recorded statistics
+            description: >
+                Clears all recorded FizzBuzz request statistics. Requires a valid reset token provided
+                via the `X-Reset-Token` header
+            operationId: resetStatistics
+            security:
+                - resetToken: []
+            responses:
+                '204':
+                    description: Statistics successfully cleared
+                '403':
+                    description: Missing or invalid reset token
 
     /health:
         get:
@@ -231,3 +245,12 @@ components:
                         $ref: '#/components/schemas/ValidationErrorResponse'
         TooManyRequests:
             description: Rate limit exceeded for this client IP
+
+    securitySchemes:
+        resetToken:
+            type: apiKey
+            in: header
+            name: X-Reset-Token
+            description: >
+                Secret token required to reset statistics. Configured via
+                the RESET_TOKEN environment variable (never committed)

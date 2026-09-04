@@ -57,4 +57,23 @@ final class CorsTest extends WebTestCase
         self::assertResponseIsSuccessful();
         self::assertResponseNotHasHeader('Access-Control-Allow-Origin');
     }
+
+    public function testPreflightAllowsDeleteMethodAndResetTokenHeader(): void
+    {
+        $client = self::createClient();
+
+        $client->request(
+            'OPTIONS',
+            '/statistics',
+            server: [
+                'HTTP_ORIGIN' => 'http://localhost:3000',
+                'HTTP_ACCESS_CONTROL_REQUEST_METHOD' => 'DELETE',
+                'HTTP_ACCESS_CONTROL_REQUEST_HEADERS' => 'X-Reset-Token',
+            ],
+        );
+
+        self::assertResponseIsSuccessful();
+        self::assertResponseHasHeader('Access-Control-Allow-Methods');
+        self::assertStringContainsString('DELETE', (string) $client->getResponse()->headers->get('Access-Control-Allow-Methods'));
+    }
 }
