@@ -19,7 +19,7 @@ final class HealthController
     public function __invoke(): JsonResponse
     {
         $redisStatus = $this->checkRedis();
-        $isHealthy = $redisStatus === 'ok';
+        $isHealthy = 'ok' === $redisStatus;
 
         return new JsonResponse(
             [

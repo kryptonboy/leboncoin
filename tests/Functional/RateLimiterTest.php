@@ -29,7 +29,7 @@ final class RateLimiterTest extends WebTestCase
         $client = self::createClient();
         self::getContainer()->get('fizzbuzz.rate_limiter.cache')->clear();
 
-        for ($i = 0; $i < 3; $i++) {
+        for ($i = 0; $i < 3; ++$i) {
             $client->request('GET', '/fizzbuzz?int1=3&int2=5&limit=15&str1=fizz&str2=buzz');
             self::assertResponseIsSuccessful();
         }

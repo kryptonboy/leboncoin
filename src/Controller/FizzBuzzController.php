@@ -32,7 +32,7 @@ final class FizzBuzzController extends AbstractController
         $limiter = $this->rateLimiter->create($request->getClientIp());
         if (!$limiter->consume(1)->isAccepted()) {
             return $this->json(
-                [ 'error' => 'Too many requests.' ],
+                ['error' => 'Too many requests.'],
                 Response::HTTP_TOO_MANY_REQUESTS,
             );
         }
@@ -81,7 +81,7 @@ final class FizzBuzzController extends AbstractController
         $errors = [];
 
         foreach ($violations as $violation) {
-            $errors[$violation->getPropertyPath()] = (string)$violation->getMessage();
+            $errors[$violation->getPropertyPath()] = (string) $violation->getMessage();
         }
 
         return $errors;
