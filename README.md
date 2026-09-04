@@ -131,6 +131,10 @@ curl "http://localhost:8000/fizzbuzz?int1=3&int2=5&limit=15&str1=fizz&str2=buzz"
 }
 ```
 
+#### Rate limiting
+
+Requests to `/fizzbuzz` are rate-limited per client IP (sliding window). Once the limit is exceeded, the endpoint returns `429 Too Many Requests`. The limit and window are configurable via the `RATE_LIMIT_MAX_REQUESTS` and `RATE_LIMIT_INTERVAL` environment variables (defaults: 100 requests per 60 seconds).
+
 ### `GET /statistics`
 
 Returns the parameters and hit count of the most frequently requested `/fizzbuzz` combination. Accepts no parameters.
@@ -199,3 +203,6 @@ The functional test suite needs a real Redis instance to run against. GitHub Act
 
 ### Multi-stage Docker build
 The `Dockerfile` is split into a shared `base` stage (PHP extensions, Composer) and three targets: `dev` (local development, code mounted via volume), `builder` (used by CI, dependencies + code baked in), and `runtime` (deployment-ready, dependencies pruned via `--no-dev`, no compilation toolchain). This keeps the deployable image lean: **810 MB → 201 MB** (~75% reduction) compared to a single-stage build with the full compilation toolchain and dev dependencies included.
+
+### Rate limiter storage
+The rate limiter uses a dedicated Redis logical database (`db 1`), separate from the one used for statistics (`db 0`). This keeps the two concerns fully isolated — clearing rate limiter state (e.g. in tests) never risks affecting recorded statistics, and vice versa.

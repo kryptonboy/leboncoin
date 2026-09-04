@@ -1,0 +1,9 @@
+# see https://symfony.com/doc/current/reference/configuration/framework.html#rate-limiter-2
+framework:
+    rate_limiter:
+        limiters:
+            fizzbuzz:
+                policy: 'sliding_window'
+                limit: '%env(int:RATE_LIMIT_MAX_REQUESTS)%'
+                interval: '%env(RATE_LIMIT_INTERVAL)% seconds'
+                storage_service: 'app.rate_limiter.storage'

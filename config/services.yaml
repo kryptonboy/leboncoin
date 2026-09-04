@@ -28,3 +28,8 @@ services:
 
     App\Service\StatisticsTracker\StatisticsTrackerInterface:
         class: App\Service\StatisticsTracker\RedisStatisticsTracker
+
+    app.rate_limiter.storage:
+        class: Symfony\Component\RateLimiter\Storage\CacheStorage
+        arguments:
+            - '@fizzbuzz.rate_limiter.cache'

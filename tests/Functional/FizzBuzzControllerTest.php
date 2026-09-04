@@ -6,6 +6,7 @@ namespace App\Tests\Functional;
 
 use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\HttpFoundation\Response;
 
 final class FizzBuzzControllerTest extends WebTestCase
 {
@@ -124,7 +125,7 @@ final class FizzBuzzControllerTest extends WebTestCase
 
     public function testMalformedJsonBodyReturns400(): void
     {
-        $client = static::createClient();
+        $client = self::createClient();
 
         $client->request(
             method: 'POST',
