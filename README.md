@@ -113,7 +113,12 @@ To use it:
 2. Set the `base_url` variable to match the one corresponding to the docker container (defaults to `http://localhost:8000`)
 
 ## CI
-Every push or pull request to the `main` branch triggers a github actions workflow that builds the Docker image and runs both the unit and functional test suites. See [`.github/workflows/ci.yml`](.github/workflows/ci.yml) 
+Every push or pull request to the `main` branch triggers a github actions workflow (See [`.github/workflows/ci.yml`](.github/workflows/ci.yml)) that:
+- builds the Docker image 
+- runs the unit tests suite
+- runs the functional tests suite
+- runs PHPStan Level 8
+- runs PHP-cs-fixer
 
 ## Design decisions
 
