@@ -74,6 +74,6 @@ final class CorsTest extends WebTestCase
 
         self::assertResponseIsSuccessful();
         self::assertResponseHasHeader('Access-Control-Allow-Methods');
-        self::assertStringContainsString('DELETE', $client->getResponse()->headers->get('Access-Control-Allow-Methods'));
+        self::assertStringContainsString('DELETE', (string) $client->getResponse()->headers->get('Access-Control-Allow-Methods'));
     }
 }
