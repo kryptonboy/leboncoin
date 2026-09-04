@@ -438,6 +438,41 @@
                     ]
                 }
             ]
+        },
+        {
+            "name": "Health",
+            "item": [
+                {
+                    "name": "GET /health - healthy",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{base_url}}/health",
+                            "host": ["{{base_url}}"],
+                            "path": ["health"]
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test('Response reports ok status', function () {",
+                                    "    const json = pm.response.json();",
+                                    "    pm.expect(json.status).to.eql('ok');",
+                                    "    pm.expect(json.redis).to.eql('ok');",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
         }
     ]
 }

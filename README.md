@@ -49,6 +49,11 @@ docker build --target dev -t fizzbuzz:dev .
 docker build --target runtime -t fizzbuzz:prod .
 ```
 
+### Running tests
+```bash
+docker run --rm fizzbuzz:dev vendor/bin/phpunit
+```
+
 ## Testing the production image locally
 
 The `runtime` target is what actually gets deployed, so it's worth verifying it works end-to-end before shipping. An `app-prod` service (built from the `runtime` target) is included in `docker-compose.yml` for this purpose.
@@ -86,11 +91,6 @@ docker images | Select-String "fizzbuzz"
 ### 4. Switch back to `dev`
 
 Revert the nginx edit above to point back to `app:9000` for regular development.
-
-### Running tests
-```bash
-docker run --rm fizzbuzz:dev vendor/bin/phpunit
-```
 
 ## API
 
@@ -131,6 +131,14 @@ curl "http://localhost:8000/fizzbuzz?int1=3&int2=5&limit=15&str1=fizz&str2=buzz"
 }
 ```
 
+#### Rate limiting
+
+Requests to `/fizzbuzz` are rate-limited per client IP (sliding window). Once the limit is exceeded, the endpoint returns `429 Too Many Requests`. The limit and window are configurable via the `RATE_LIMIT_MAX_REQUESTS` and `RATE_LIMIT_INTERVAL` environment variables (defaults: 100 requests per 60 seconds).
+
+#### CORS
+
+Cross-origin requests are supported via [NelmioCorsBundle](https://symfony.com/bundles/NelmioCorsBundle). Allowed origins are configurable via the `CORS_ALLOW_ORIGIN` environment variable (a regex, defaults to `^https?://localhost:\d+$` — any `localhost` port).
+
 ### `GET /statistics`
 
 Returns the parameters and hit count of the most frequently requested `/fizzbuzz` combination. Accepts no parameters.
@@ -144,7 +152,7 @@ Returns the parameters and hit count of the most frequently requested `/fizzbuzz
 }
 ```
 
-### Example response - with data
+#### Example response - with data
 
 ```json
 {
@@ -159,8 +167,34 @@ Returns the parameters and hit count of the most frequently requested `/fizzbuzz
 }
 ```
 
+### `GET /health`
+
+Health check endpoint, primarily meant for orchestrators. Accepts no parameters.
+
+#### Example response — healthy (`200`)
+
+```json
+{
+    "status": "ok",
+    "redis": "ok"
+}
+```
+
+#### Example response — degraded (`503`)
+
+```json
+{
+    "status": "degraded",
+    "redis": "unreachable"
+}
+```
+
 ### Postman collection
-A ready to use [Postman collection](postman_collection.json) is available at the root of the repository, covering both success and validation error cases. It also provides `/statistics` scenarios 
+A ready to use [Postman collection](postman_collection.json) is available at the root of the repository, covering:
+- Success cases
+- Validation error cases
+- `/statistics` scenarios
+- `/health` endpoint (only tests the ok case)
 
 To use it:
 1. Import `postman_collection.json` into Postman
@@ -199,3 +233,15 @@ The functional test suite needs a real Redis instance to run against. GitHub Act
 
 ### Multi-stage Docker build
 The `Dockerfile` is split into a shared `base` stage (PHP extensions, Composer) and three targets: `dev` (local development, code mounted via volume), `builder` (used by CI, dependencies + code baked in), and `runtime` (deployment-ready, dependencies pruned via `--no-dev`, no compilation toolchain). This keeps the deployable image lean: **810 MB → 201 MB** (~75% reduction) compared to a single-stage build with the full compilation toolchain and dev dependencies included.
+
+### Rate limiter storage
+The rate limiter uses a dedicated Redis logical database (`db 1`), separate from the one used for statistics (`db 0`). This keeps the two concerns fully isolated — clearing rate limiter state (e.g. in tests) never risks affecting recorded statistics, and vice versa.
+
+### CORS scope
+Only `GET`, `OPTIONS`, and `POST` are allowed (the only methods the API actually exposes).
+
+### `/health` endpoint
+Monitoring is part of production, the goal of this endpoint is to monitor the global status of the architecture. Could easily be completed as the project grows and requires new services to run.
+
+### OpenAPI specification
+A machine-readable [OpenAPI 3.0 specification](openapi.yaml) describing all endpoints is available at the root of the repository. You can view it interactively by pasting its content into the [Swagger Editor](https://editor.swagger.io/).

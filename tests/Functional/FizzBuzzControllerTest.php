@@ -6,6 +6,7 @@ namespace App\Tests\Functional;
 
 use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\HttpFoundation\Response;
 
 final class FizzBuzzControllerTest extends WebTestCase
 {
@@ -99,7 +100,7 @@ final class FizzBuzzControllerTest extends WebTestCase
         $client = self::createClient();
         $client->request('GET', '/fizzbuzz');
 
-        self::assertResponseStatusCodeSame(400);
+        self::assertResponseStatusCodeSame(Response::HTTP_BAD_REQUEST);
 
         $data = json_decode((string) $client->getResponse()->getContent(), true);
         self::assertArrayHasKey('errors', $data);
@@ -116,7 +117,7 @@ final class FizzBuzzControllerTest extends WebTestCase
         $client = self::createClient();
         $client->request('GET', '/fizzbuzz', $params);
 
-        self::assertResponseStatusCodeSame(400);
+        self::assertResponseStatusCodeSame(Response::HTTP_BAD_REQUEST);
 
         $data = json_decode((string) $client->getResponse()->getContent(), true);
         self::assertSame($errors, $data['errors']);
@@ -124,7 +125,7 @@ final class FizzBuzzControllerTest extends WebTestCase
 
     public function testMalformedJsonBodyReturns400(): void
     {
-        $client = static::createClient();
+        $client = self::createClient();
 
         $client->request(
             method: 'POST',
@@ -133,6 +134,6 @@ final class FizzBuzzControllerTest extends WebTestCase
             content: 'not valid json',
         );
 
-        self::assertResponseStatusCodeSame(400);
+        self::assertResponseStatusCodeSame(Response::HTTP_BAD_REQUEST);
     }
 }

@@ -15,5 +15,7 @@ framework:
         #app: cache.adapter.apcu
 
         # Namespaced pools use the above "app" backend by default
-        #pools:
-            #my.dedicated.cache: null
+        pools:
+            fizzbuzz.rate_limiter.cache:
+                adapter: cache.adapter.redis
+                provider: 'redis://%env(REDIS_HOST)%:%env(REDIS_PORT)%/1'
