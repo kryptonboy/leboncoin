@@ -190,7 +190,11 @@ Health check endpoint, primarily meant for orchestrators. Accepts no parameters.
 ```
 
 ### Postman collection
-A ready to use [Postman collection](postman_collection.json) is available at the root of the repository, covering both success and validation error cases. It also provides `/statistics` scenarios 
+A ready to use [Postman collection](postman_collection.json) is available at the root of the repository, covering:
+- Success cases
+- Validation error cases
+- `/statistics` scenarios
+- `/health` endpoint (only tests the ok case)
 
 To use it:
 1. Import `postman_collection.json` into Postman
