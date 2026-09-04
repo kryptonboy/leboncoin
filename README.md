@@ -135,6 +135,10 @@ curl "http://localhost:8000/fizzbuzz?int1=3&int2=5&limit=15&str1=fizz&str2=buzz"
 
 Requests to `/fizzbuzz` are rate-limited per client IP (sliding window). Once the limit is exceeded, the endpoint returns `429 Too Many Requests`. The limit and window are configurable via the `RATE_LIMIT_MAX_REQUESTS` and `RATE_LIMIT_INTERVAL` environment variables (defaults: 100 requests per 60 seconds).
 
+#### CORS
+
+Cross-origin requests are supported via [NelmioCorsBundle](https://symfony.com/bundles/NelmioCorsBundle). Allowed origins are configurable via the `CORS_ALLOW_ORIGIN` environment variable (a regex, defaults to `^https?://localhost:\d+$` — any `localhost` port).
+
 ### `GET /statistics`
 
 Returns the parameters and hit count of the most frequently requested `/fizzbuzz` combination. Accepts no parameters.
@@ -206,3 +210,6 @@ The `Dockerfile` is split into a shared `base` stage (PHP extensions, Composer) 
 
 ### Rate limiter storage
 The rate limiter uses a dedicated Redis logical database (`db 1`), separate from the one used for statistics (`db 0`). This keeps the two concerns fully isolated — clearing rate limiter state (e.g. in tests) never risks affecting recorded statistics, and vice versa.
+
+### CORS scope
+Only `GET`, `OPTIONS`, and `POST` are allowed (the only methods the API actually exposes).
