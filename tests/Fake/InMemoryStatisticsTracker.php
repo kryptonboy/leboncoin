@@ -41,4 +41,10 @@ final class InMemoryStatisticsTracker implements StatisticsTrackerInterface
             hits: $this->hits[$topKey],
         );
     }
+
+    public function reset(): void
+    {
+        $this->hits = [];
+        $this->requests = [];
+    }
 }

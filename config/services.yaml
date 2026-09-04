@@ -33,3 +33,7 @@ services:
         class: Symfony\Component\RateLimiter\Storage\CacheStorage
         arguments:
             - '@fizzbuzz.rate_limiter.cache'
+
+    App\Controller\StatisticsResetController:
+        arguments:
+            $resetToken: '%env(RESET_TOKEN)%'

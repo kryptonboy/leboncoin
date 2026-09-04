@@ -29,6 +29,11 @@
         {
             "key": "str2",
             "value": "buzz"
+        },
+        {
+            "key": "reset_token",
+            "value": "",
+            "description": "Set this to your local RESET_TOKEN (from .env.local) to actually test the reset — leave empty to verify the 403 rejection instead."
         }
     ],
     "item": [
@@ -436,6 +441,33 @@
                             }
                         }
                     ]
+                }
+            ]
+        },
+        {
+            "name": "DELETE /statistics - reset (requires token)",
+            "request": {
+                "method": "DELETE",
+                "header": [
+                    { "key": "X-Reset-Token", "value": "{{reset_token}}" }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/statistics",
+                    "host": ["{{base_url}}"],
+                    "path": ["statistics"]
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Status code is 204 or 403 depending on token', function () {",
+                            "    pm.expect([204, 403]).to.include(pm.response.code);",
+                            "});"
+                        ]
+                    }
                 }
             ]
         },

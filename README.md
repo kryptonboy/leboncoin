@@ -54,6 +54,14 @@ docker build --target runtime -t fizzbuzz:prod .
 docker run --rm fizzbuzz:dev vendor/bin/phpunit
 ```
 
+> To use the statistics reset endpoint locally, generate a token and add it to `.env.local` (not committed):
+> ```bash
+> docker compose exec app php -r "echo bin2hex(random_bytes(32));"
+> ```
+> ```dotenv
+> RESET_TOKEN=<generated-value>
+> ```
+
 ## Testing the production image locally
 
 The `runtime` target is what actually gets deployed, so it's worth verifying it works end-to-end before shipping. An `app-prod` service (built from the `runtime` target) is included in `docker-compose.yml` for this purpose.
@@ -167,6 +175,23 @@ Returns the parameters and hit count of the most frequently requested `/fizzbuzz
 }
 ```
 
+### `DELETE /statistics`
+
+Clears all recorded statistics. Requires a valid token via the `X-Reset-Token` header.
+
+#### Example request
+
+```bash
+curl -X DELETE "http://localhost:8000/statistics" -H "X-Reset-Token: your-secret-here"
+```
+
+#### Responses
+
+| Status | Meaning                         |
+|--------|---------------------------------|
+| `204`  | Statistics successfully cleared |
+| `403`  | Missing or invalid token        |
+
 ### `GET /health`
 
 Health check endpoint, primarily meant for orchestrators. Accepts no parameters.
@@ -238,10 +263,13 @@ The `Dockerfile` is split into a shared `base` stage (PHP extensions, Composer) 
 The rate limiter uses a dedicated Redis logical database (`db 1`), separate from the one used for statistics (`db 0`). This keeps the two concerns fully isolated — clearing rate limiter state (e.g. in tests) never risks affecting recorded statistics, and vice versa.
 
 ### CORS scope
-Only `GET`, `OPTIONS`, and `POST` are allowed (the only methods the API actually exposes).
+Only `GET`, `OPTIONS`, `POST` and `DELETE` are allowed (the only methods the API actually exposes).
 
 ### `/health` endpoint
 Monitoring is part of production, the goal of this endpoint is to monitor the global status of the architecture. Could easily be completed as the project grows and requires new services to run.
 
 ### OpenAPI specification
 A machine-readable [OpenAPI 3.0 specification](openapi.yaml) describing all endpoints is available at the root of the repository. You can view it interactively by pasting its content into the [Swagger Editor](https://editor.swagger.io/).
+
+### Statistics reset — token-based protection, no secret committed
+`DELETE /statistics` is an open endpoint but requires a valid `X-Reset-Token` header, checked against the `RESET_TOKEN` environment variable via a timing-attack-resistant comparison (`hash_equals`). The real value lives in `.env.local` only (gitignored) — `.env` (committed) leaves it empty, and the endpoint always rejects requests when no token is configured, so it fails closed rather than open by default.

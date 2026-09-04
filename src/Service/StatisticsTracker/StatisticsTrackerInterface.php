@@ -12,4 +12,6 @@ interface StatisticsTrackerInterface
     public function recordHit(FizzBuzzRequest $fizzBuzzRequest): void;
 
     public function getMostFrequent(): ?FizzBuzzStatistic;
+
+    public function reset(): void;
 }
