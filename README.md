@@ -28,14 +28,68 @@ extension=redis
 
 ## Getting started
 
+The project uses a multi-stage `Dockerfile` with three targets:
+
+| Target    | Description                                                                                                                                        |
+|-----------|----------------------------------------------------------------------------------------------------------------------------------------------------|
+| `dev`     | Used for local development,code is mounted as a volume to avoid rebuilding after each modification on the codebase, dependencies include dev tools |
+| `builder` | Used by the CI, code is copied into the image, dependencies include dev tools                                                                      |
+| `runtime` | Used for production environment, minimal image, no dev dependencies nor compilation toolchain                                                      |
+
 ### Build the docker image:
+
+For local development (recommended — enables live code reload via volume):
 ```bash
-docker build -t fizzbuzz .
+docker compose up --build
 ```
+
+To build a specific target manually:
+```bash
+docker build --target dev -t fizzbuzz:dev .
+docker build --target runtime -t fizzbuzz:prod .
+```
+
+## Testing the production image locally
+
+The `runtime` target is what actually gets deployed, so it's worth verifying it works end-to-end before shipping. An `app-prod` service (built from the `runtime` target) is included in `docker-compose.yml` for this purpose.
+
+### 1. Point nginx to it
+
+In [`docker/nginx/default.conf`](`docker/nginx/default.conf`), comment out the `dev` target and uncomment the `app-prod` one:
+
+```nginx
+location ~ ^/index\.php(/|$) {
+    # fastcgi_pass app:9000;
+    fastcgi_pass app-prod:9000;
+    ...
+}
+```
+
+### 2. Rebuild and test
+
+```bash
+docker compose up -d --build
+curl "http://localhost:8000/fizzbuzz?int1=3&int2=5&limit=15&str1=fizz&str2=buzz"
+curl "http://localhost:8000/statistics"
+```
+
+### 3. Check the image size
+**Linux/macOS:**
+```bash
+docker images | grep fizzbuzz
+```
+**Windows:**
+```bash
+docker images | Select-String "fizzbuzz"
+```
+
+### 4. Switch back to `dev`
+
+Revert the nginx edit above to point back to `app:9000` for regular development.
 
 ### Running tests
 ```bash
-docker run --rm fizzbuzz vendor/bin/phpunit
+docker run --rm fizzbuzz:dev vendor/bin/phpunit
 ```
 
 ## API
@@ -142,3 +196,6 @@ Statistics are currently stored in Redis. Other backends could be added (a SQL d
 
 ### Redis service in CI
 The functional test suite needs a real Redis instance to run against. GitHub Actions [service containers](https://docs.github.com/en/actions/tutorials/use-containerized-services/create-redis-service-containers) provide this: Redis is started alongside the job and reachable via `localhost` on the runner, torn down automatically once the job completes.
+
+### Multi-stage Docker build
+The `Dockerfile` is split into a shared `base` stage (PHP extensions, Composer) and three targets: `dev` (local development, code mounted via volume), `builder` (used by CI, dependencies + code baked in), and `runtime` (deployment-ready, dependencies pruned via `--no-dev`, no compilation toolchain). This keeps the deployable image lean: **810 MB → 201 MB** (~75% reduction) compared to a single-stage build with the full compilation toolchain and dev dependencies included.
