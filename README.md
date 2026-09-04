@@ -49,6 +49,11 @@ docker build --target dev -t fizzbuzz:dev .
 docker build --target runtime -t fizzbuzz:prod .
 ```
 
+### Running tests
+```bash
+docker run --rm fizzbuzz:dev vendor/bin/phpunit
+```
+
 ## Testing the production image locally
 
 The `runtime` target is what actually gets deployed, so it's worth verifying it works end-to-end before shipping. An `app-prod` service (built from the `runtime` target) is included in `docker-compose.yml` for this purpose.
@@ -86,11 +91,6 @@ docker images | Select-String "fizzbuzz"
 ### 4. Switch back to `dev`
 
 Revert the nginx edit above to point back to `app:9000` for regular development.
-
-### Running tests
-```bash
-docker run --rm fizzbuzz:dev vendor/bin/phpunit
-```
 
 ## API
 
@@ -152,7 +152,7 @@ Returns the parameters and hit count of the most frequently requested `/fizzbuzz
 }
 ```
 
-### Example response - with data
+#### Example response - with data
 
 ```json
 {
@@ -164,6 +164,28 @@ Returns the parameters and hit count of the most frequently requested `/fizzbuzz
         "str2": "buzz"
     },
     "hits": 23
+}
+```
+
+### `GET /health`
+
+Health check endpoint, primarily meant for orchestrators. Accepts no parameters.
+
+#### Example response — healthy (`200`)
+
+```json
+{
+    "status": "ok",
+    "redis": "ok"
+}
+```
+
+#### Example response — degraded (`503`)
+
+```json
+{
+    "status": "degraded",
+    "redis": "unreachable"
 }
 ```
 
@@ -213,3 +235,6 @@ The rate limiter uses a dedicated Redis logical database (`db 1`), separate from
 
 ### CORS scope
 Only `GET`, `OPTIONS`, and `POST` are allowed (the only methods the API actually exposes).
+
+### `/health` endpoint
+Monitoring is part of production, the goal of this endpoint is to monitor the global status of the architecture. Could easily be completed as the project grows and requires new services to run.

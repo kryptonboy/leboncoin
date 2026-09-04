@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Functional;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\HttpFoundation\Response;
 
 final class RateLimiterTest extends WebTestCase
 {
@@ -34,6 +35,6 @@ final class RateLimiterTest extends WebTestCase
         }
 
         $client->request('GET', '/fizzbuzz?int1=3&int2=5&limit=15&str1=fizz&str2=buzz');
-        self::assertResponseStatusCodeSame(429);
+        self::assertResponseStatusCodeSame(Response::HTTP_TOO_MANY_REQUESTS);
     }
 }
